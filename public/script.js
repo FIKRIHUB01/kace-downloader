@@ -100,37 +100,19 @@ function renderResult(medias) {
 }
 
 // Function Force Direct Download (TIDAK BERUBAH)
-async function forceDownload(url, filename, btnElement) {
-    const originalText = btnElement.innerText;
-    btnElement.innerText = "DOWNLOADING...";
-    btnElement.disabled = true;
+function forceDownload(url, filename, btnElement) {
+    // Cara paling aman sedunia: Buka di tab baru
+    // Tidak akan kena 502 karena browser yang handle langsung
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    btnElement.innerText = "OPENED IN NEW TAB";
+    setTimeout(() => { btnElement.innerText = "DOWNLOAD AGAIN"; }, 3000);
+}
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network error");
-        
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        
-        a.click();
-        
-        window.URL.revokeObjectURL(blobUrl);
-        document.body.removeChild(a);
-
-    } catch (e) {
-        console.error("Direct download failed, opening in new tab", e);
-        window.location.href = url; 
-    } finally {
-        btnElement.innerText = "COMPLETED";
-        setTimeout(() => {
-            btnElement.innerText = originalText;
-            btnElement.disabled = false;
-        }, 2000);
-    }
 }
